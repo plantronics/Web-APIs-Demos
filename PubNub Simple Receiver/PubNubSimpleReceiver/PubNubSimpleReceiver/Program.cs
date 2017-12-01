@@ -45,7 +45,10 @@ namespace PubNubSimpleReceiver
             // Subscripe to your PubNub channel and wait for events
             pubnub.Subscribe<string>()
                 .Channels(new string[] {
-                    ConfigurationManager.AppSettings.Get("PubNub_SubscribeChannel")
+                    ConfigurationManager.AppSettings.Get("PubNub_SubscribeChannel1"),
+                    ConfigurationManager.AppSettings.Get("PubNub_SubscribeChannel2"),
+                    ConfigurationManager.AppSettings.Get("PubNub_SubscribeChannel3"),
+                    ConfigurationManager.AppSettings.Get("PubNub_SubscribeChannel4"),
                 })
                 .Execute();
 

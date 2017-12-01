@@ -25,7 +25,10 @@ import java.util.Scanner;
   * and add your settings, as follows:
   * - PubNub_SubscribeKey - this key is provided by your PubNub developer account
   * - PubNub_PublishKey - this key is provided by your PubNub developer account
-  * - PubNub_SubscribeChannel - this channel id you create in your PubNub developer account
+  * - PubNub_SubscribeChannel1 - this channel ids in your PubNub developer account that Plantronics streaming API is publishing to
+  * - PubNub_SubscribeChannel2 - this channel ids in your PubNub developer account that Plantronics streaming API is publishing to
+  * - PubNub_SubscribeChannel3 - this channel ids in your PubNub developer account that Plantronics streaming API is publishing to
+  * - PubNub_SubscribeChannel4 - this channel ids in your PubNub developer account that Plantronics streaming API is publishing to
   * Author: Lewis.Collins@Plantronics.com, 26th July 2017
  * @author LCollins
  */
@@ -65,7 +68,12 @@ public class StreamingAPIDemo {
             }
         });
 
-        pubnub.subscribe().channels(Arrays.asList(prop.getProperty("PubNub_SubscribeChannel"))).execute();
+        pubnub.subscribe().channels(Arrays.asList(
+                prop.getProperty("PubNub_SubscribeChannel1"),
+                prop.getProperty("PubNub_SubscribeChannel2"),
+                prop.getProperty("PubNub_SubscribeChannel3"),
+                prop.getProperty("PubNub_SubscribeChannel4")
+                )).execute();
         
         System.out.println("press enter to quit...");
         Scanner scan=new Scanner(System.in);
