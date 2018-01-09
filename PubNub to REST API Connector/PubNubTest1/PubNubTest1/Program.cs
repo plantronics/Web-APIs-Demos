@@ -25,7 +25,6 @@ namespace PubNubTest1
     /// - PubNub_SubscribeChannel2 - this is the PubNub subscribe channel id 2 provided for your Plantronics tenant
     /// - PubNub_SubscribeChannel3 - this is the PubNub subscribe channel id 3 provided for your Plantronics tenant
     /// - PubNub_SubscribeChannel4 - this is the PubNub subscribe channel id 4 provided for your Plantronics tenant
-    /// - Plantronics User_Device_ID - this is the unique device ID for your user's Plantronics device of interest (as defined in Plantronics Manager Pro tenant data)
     /// - REST_API_Endpoint - this is URL of a REST Service API to forward the Plantronics realtime event to
     /// - SMSNumber - (OPTIONAL) ADD YOUR MOBILE NUMBER HERE TO USE IN YOUR REST API FLOW LATER
     /// 
@@ -168,50 +167,46 @@ namespace PubNubTest1
 
             if (JSONObj != null)
             {
-                // new, only forward event if it matches defined User Device Id
-                // for demo purposes
-                if (JSONObj.deviceId == ConfigurationManager.AppSettings.Get("User_Device_ID"))
+                Console.WriteLine("Event was from deviceId (" + JSONObj.deviceId + ")");
+                Console.WriteLine("Forwarding to REST API...");
+
+                //Format: { "SMSNumber":"a mobile number", "Message":"a message body"}
+                StringBuilder sb = new StringBuilder();
+                sb.Append("{ \"SMSNumber\":\"");
+                sb.Append(ConfigurationManager.AppSettings.Get("SMSNumber"));
+                sb.Append("\",\"Message\":\"");
+                sb.Append("Event: " + JSONObj.eventType + ", ");
+                sb.Append("Time: " + JSONObj.timeStamp + ", ");
+                sb.Append("deviceId: " + JSONObj.deviceId);
+                sb.Append("\"}");
+
+                try
                 {
-                    Console.WriteLine("Event was from User_Device_ID (" + ConfigurationManager.AppSettings.Get("User_Device_ID") + ")");
-                    Console.WriteLine("Forwarding to REST API...");
+                    var request = new RestRequest(Method.POST);
+                    request.AddHeader("postman-token", "64e44b93-628a-eeb8-2efe-ae1ace92187a");
+                    request.AddHeader("cache-control", "no-cache");
+                    request.AddHeader("content-type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW");
 
-                    //Format: { "SMSNumber":"a mobile number", "Message":"a message body"}
-                    StringBuilder sb = new StringBuilder();
-                    sb.Append("{ \"SMSNumber\":\"");
-                    sb.Append(ConfigurationManager.AppSettings.Get("SMSNumber"));
-                    sb.Append("\",\"Message\":\"");
-                    sb.Append(JSONObj.eventType);
-                    sb.Append(", ");
-                    sb.Append(JSONObj.timeStamp);
-                    sb.Append(", ");
-                    sb.Append(JSONObj.productCode.@base);
-                    sb.Append(", ");
-                    sb.Append(JSONObj.productCode.headset);
-                    sb.Append("\"}");
-                    try
-                    {
-                        var request = new RestRequest(Method.POST);
-                        request.AddHeader("postman-token", "64e44b93-628a-eeb8-2efe-ae1ace92187a");
-                        request.AddHeader("cache-control", "no-cache");
-                        request.AddHeader("content-type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW");
-                        request.AddParameter("multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW", "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"family\"\r\n\r\nTest\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"type\"\r\n\r\nSMS\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"version\"\r\n\r\n1.0\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"eventBody\"\r\n\r\n"
-                            + sb.ToString()
-                            + "\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"\"\r\n\r\n\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--", ParameterType.RequestBody);
-                        IRestResponse response = client.Execute(request);
+                    request.AddParameter(
+                        "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW", 
+                        "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; " +
+                        "name=\"family\"\r\n\r\n" + ConfigurationManager.AppSettings.Get("REST_API_Family") +   // family
+                        "\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; " + 
+                        "name=\"type\"\r\n\r\n" + ConfigurationManager.AppSettings.Get("REST_API_Type") +       // type
+                        "\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; " +
+                        "name=\"version\"\r\n\r\n" + ConfigurationManager.AppSettings.Get("REST_API_Version") + // version
+                        "\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"eventBody\"\r\n\r\n"
+                        + sb.ToString()                                                                         // eventBody
+                        + "\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"\"\r\n\r\n\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--", 
+                        ParameterType.RequestBody);
 
-                        //HttpResponseMessage response = await client.PostAsJsonAsync(ConfigurationManager.AppSettings.Get("REST_API_RequestUri"), message);
-                        //response.EnsureSuccessStatusCode();
+                    IRestResponse response = client.Execute(request);
 
-                        Console.WriteLine("response: " + response.StatusDescription); // await response.Content.ReadAsStringAsync());
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine("error: " + e.ToString());
-                    }
+                    Console.WriteLine("response: " + response.StatusDescription);
                 }
-                else
+                catch (Exception e)
                 {
-                    Console.WriteLine("Event was not from User_Device_ID, IGNORING! \r\n(Expected: " + ConfigurationManager.AppSettings.Get("User_Device_ID") + ",\r\n      Got: "+ JSONObj.deviceId + ")");
+                    Console.WriteLine("error: " + e.ToString());
                 }
             }
             else
