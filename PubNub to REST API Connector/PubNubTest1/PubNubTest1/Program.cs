@@ -178,6 +178,16 @@ namespace PubNubTest1
                 sb.Append("Event: " + JSONObj.eventType + ", ");
                 sb.Append("Time: " + JSONObj.timeStamp + ", ");
                 sb.Append("deviceId: " + JSONObj.deviceId);
+                sb.Append("\"");
+                // New LC 18th Jan 2018, append additional individual fields that may be of use
+                sb.Append(",\"deviceId\":\"");
+                sb.Append(JSONObj.deviceId);
+                sb.Append("\",\"Event\":\"");
+                sb.Append(JSONObj.eventType);
+                sb.Append("\",\"Time\":\"");
+                sb.Append(JSONObj.timeStamp);
+                sb.Append("\",\"ExtraParams\":\"");
+                sb.Append(ConfigurationManager.AppSettings.Get("ExtraParams"));
                 sb.Append("\"}");
 
                 try
